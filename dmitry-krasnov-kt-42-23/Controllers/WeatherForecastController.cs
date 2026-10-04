@@ -38,5 +38,11 @@ namespace dmitry_krasnov_kt_42_23.Controllers
             list.Add(newSummary);
             return list.ToArray();
         }
+
+        [HttpGet("TestException")]
+        public IActionResult TestException()
+        {
+            throw new Exception("Тестовая ошибка для проверки middleware");
+        }
     }
 }

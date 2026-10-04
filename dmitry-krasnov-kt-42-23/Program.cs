@@ -1,5 +1,6 @@
 using dmitry_krasnov_kt_42_23.Database;
 using System.Text.Json.Serialization;
+using dmitry_krasnov_kt_42_23.Middlewares;
 using static dmitry_krasnov_kt_42_23.ServiceExtensions.ServiceExtensions;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -27,6 +28,8 @@ try
     builder.Services.AddServices();
 
     var app = builder.Build();
+
+    app.UseMiddleware<ExceptionHandlerMiddleware>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
