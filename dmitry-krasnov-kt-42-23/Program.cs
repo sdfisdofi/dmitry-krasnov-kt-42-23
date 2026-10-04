@@ -1,4 +1,5 @@
 using dmitry_krasnov_kt_42_23.Database;
+using System.Text.Json.Serialization;
 using static dmitry_krasnov_kt_42_23.ServiceExtensions.ServiceExtensions;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -14,7 +15,9 @@ try
     builder.Host.UseNLog();
     // Add services to the container.
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();

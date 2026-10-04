@@ -1,3 +1,4 @@
+using dmitry_krasnov_kt_42_23.Interfaces.DisciplinesInterfaces;
 using dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces;
 using dmitry_krasnov_kt_42_23.Interfaces.StudentsInterfaces;
 
@@ -10,6 +11,7 @@ namespace dmitry_krasnov_kt_42_23.ServiceExtensions
         {
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<IDisciplineService, DisciplineService>();
 
             return services;
         }
