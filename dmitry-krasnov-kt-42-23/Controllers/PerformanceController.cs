@@ -1,3 +1,4 @@
+using dmitry_krasnov_kt_42_23.Filters.PerformanceFilters;
 using dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces;
 using dmitry_krasnov_kt_42_23.Requests.PerformanceRequests;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +17,52 @@ namespace dmitry_krasnov_kt_42_23.Controllers
             _logger = logger;
             _performanceService = performanceService;
         }
+
+        // ===================== Получение успеваемости =====================
+
+        // Оценки и зачеты конкретного студента
+        [HttpPost("GetStudentPerformance")]
+        public async Task<IActionResult> GetStudentPerformanceAsync(StudentPerformanceFilter filter, CancellationToken cancellationToken = default)
+        {
+            var (result, error) = await _performanceService.GetStudentPerformanceAsync(filter, cancellationToken);
+
+            if (error != null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok(result);
+        }
+
+        // Средний балл по предмету в группе
+        [HttpPost("GetGroupDisciplineAverage")]
+        public async Task<IActionResult> GetGroupDisciplineAverageAsync(GroupDisciplineAverageFilter filter, CancellationToken cancellationToken = default)
+        {
+            var (result, error) = await _performanceService.GetGroupDisciplineAverageAsync(filter, cancellationToken);
+
+            if (error != null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok(result);
+        }
+
+        // Средний балл по году
+        [HttpPost("GetYearAverage")]
+        public async Task<IActionResult> GetYearAverageAsync(YearAverageFilter filter, CancellationToken cancellationToken = default)
+        {
+            var (result, error) = await _performanceService.GetYearAverageAsync(filter, cancellationToken);
+
+            if (error != null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok(result);
+        }
+
+        // ============ Добавление и изменение оценок и зачетов ============
 
         // Выставление оценки студенту
         [HttpPost("AddGrade")]
