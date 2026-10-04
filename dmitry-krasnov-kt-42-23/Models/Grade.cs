@@ -14,5 +14,11 @@ namespace dmitry_krasnov_kt_42_23.Models
 
         public int DisciplineId { get; set; }
         public Discipline? Discipline { get; set; }
+
+        // Положительная ли оценка (3, 4, 5 - да; 2 - нет)
+        public bool IsPositive()
+        {
+            return Value >= 3;
+        }
     }
 }
