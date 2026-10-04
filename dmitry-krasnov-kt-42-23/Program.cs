@@ -1,4 +1,5 @@
 using dmitry_krasnov_kt_42_23.Database;
+using static dmitry_krasnov_kt_42_23.ServiceExtensions.ServiceExtensions;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 using NLog.Web;
@@ -20,6 +21,7 @@ try
 
     builder.Services.AddDbContext<StudentDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    builder.Services.AddServices();
 
     var app = builder.Build();
 
