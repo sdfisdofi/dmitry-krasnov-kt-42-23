@@ -11,10 +11,10 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces
     {
         public Task<Group[]> GetGroupsAsync(GroupFilter filter, CancellationToken cancellationToken);
 
-        public Task<Group> AddGroupAsync(AddGroupRequest request, CancellationToken cancellationToken);
+        // Возвращают пару: группа (если всё успешно) или текст ошибки (если что-то не так)
+        public Task<(Group? Group, string? Error)> AddGroupAsync(AddGroupRequest request, CancellationToken cancellationToken);
 
-        // Возвращает null, если группа с таким Id не найдена
-        public Task<Group?> UpdateGroupAsync(UpdateGroupRequest request, CancellationToken cancellationToken);
+        public Task<(Group? Group, string? Error)> UpdateGroupAsync(UpdateGroupRequest request, CancellationToken cancellationToken);
 
         // Возвращает false, если группа с таким Id не найдена
         public Task<bool> DeleteGroupAsync(int groupId, CancellationToken cancellationToken);
@@ -36,11 +36,18 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces
             // Запрос еще НЕ выполняется - мы только постепенно добавляем к нему условия
             var query = _dbContext.Set<Group>().AsQueryable();
 
-            // Фильтр по специальности (если передан)
-            var specialty = filter.Specialty;
-            if (!string.IsNullOrWhiteSpace(specialty))
+            // Фильтр по Id специальности (если передан)
+            if (filter.SpecialityId.HasValue)
             {
-                query = query.Where(g => g.Specialty.Contains(specialty));
+                var specialityId = filter.SpecialityId.Value;
+                query = query.Where(g => g.SpecialityId == specialityId);
+            }
+
+            // Фильтр по названию специальности (через навигационное свойство Speciality)
+            var specialityTitle = filter.SpecialityTitle;
+            if (!string.IsNullOrWhiteSpace(specialityTitle))
+            {
+                query = query.Where(g => g.Speciality!.Title.Contains(specialityTitle));
             }
 
             // Фильтр по году (если передан)
@@ -61,12 +68,19 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces
             return await query.ToArrayAsync(cancellationToken);
         }
 
-        public async Task<Group> AddGroupAsync(AddGroupRequest request, CancellationToken cancellationToken = default)
+        public async Task<(Group? Group, string? Error)> AddGroupAsync(AddGroupRequest request, CancellationToken cancellationToken = default)
         {
+            // Нельзя создать группу с несуществующей или удаленной специальностью
+            var specialityError = await CheckSpecialityAsync(request.SpecialityId, cancellationToken);
+            if (specialityError != null)
+            {
+                return (null, specialityError);
+            }
+
             var group = new Group
             {
                 GroupName = request.GroupName,
-                Specialty = request.Specialty,
+                SpecialityId = request.SpecialityId,
                 Year = request.Year,
                 IsDeleted = false
             };
@@ -76,28 +90,40 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces
             // После SaveChanges база сама присвоит группе GroupId
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return group;
+            // Подгружаем специальность, чтобы она отобразилась в ответе
+            await _dbContext.Entry(group).Reference(g => g.Speciality).LoadAsync(cancellationToken);
+
+            return (group, null);
         }
 
-        public async Task<Group?> UpdateGroupAsync(UpdateGroupRequest request, CancellationToken cancellationToken = default)
+        public async Task<(Group? Group, string? Error)> UpdateGroupAsync(UpdateGroupRequest request, CancellationToken cancellationToken = default)
         {
             var group = await _dbContext.Set<Group>()
                 .FirstOrDefaultAsync(g => g.GroupId == request.GroupId, cancellationToken);
 
             if (group == null)
             {
-                return null;
+                return (null, $"Группа с Id = {request.GroupId} не найдена");
+            }
+
+            var specialityError = await CheckSpecialityAsync(request.SpecialityId, cancellationToken);
+            if (specialityError != null)
+            {
+                return (null, specialityError);
             }
 
             // EF Core отслеживает загруженный объект,
             // поэтому достаточно поменять свойства и вызвать SaveChanges
             group.GroupName = request.GroupName;
-            group.Specialty = request.Specialty;
+            group.SpecialityId = request.SpecialityId;
             group.Year = request.Year;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return group;
+            // Если специальность поменялась - подгружаем новую для ответа
+            await _dbContext.Entry(group).Reference(g => g.Speciality).LoadAsync(cancellationToken);
+
+            return (group, null);
         }
 
         public async Task<bool> DeleteGroupAsync(int groupId, CancellationToken cancellationToken = default)
@@ -128,6 +154,26 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return true;
+        }
+
+        // Вспомогательный метод: проверяет, что специальность существует и не удалена.
+        // Возвращает текст ошибки или null, если всё в порядке
+        private async Task<string?> CheckSpecialityAsync(int specialityId, CancellationToken cancellationToken)
+        {
+            var speciality = await _dbContext.Set<Speciality>()
+                .FirstOrDefaultAsync(s => s.SpecialityId == specialityId, cancellationToken);
+
+            if (speciality == null)
+            {
+                return $"Специальность с Id = {specialityId} не найдена";
+            }
+
+            if (speciality.IsDeleted)
+            {
+                return $"Специальность с Id = {specialityId} удалена";
+            }
+
+            return null;
         }
     }
 }

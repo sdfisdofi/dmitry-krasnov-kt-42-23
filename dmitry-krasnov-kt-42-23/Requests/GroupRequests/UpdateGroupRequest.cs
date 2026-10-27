@@ -12,9 +12,9 @@ namespace dmitry_krasnov_kt_42_23.Requests.GroupRequests
         [MaxLength(100)]
         public string GroupName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(200)]
-        public string Specialty { get; set; } = string.Empty;
+        // Id существующей специальности
+        [Range(1, int.MaxValue)]
+        public int SpecialityId { get; set; }
 
         [Range(1990, 2100)]
         public int Year { get; set; }

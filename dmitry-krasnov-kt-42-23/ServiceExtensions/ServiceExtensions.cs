@@ -1,6 +1,7 @@
 using dmitry_krasnov_kt_42_23.Interfaces.DisciplinesInterfaces;
 using dmitry_krasnov_kt_42_23.Interfaces.GroupsInterfaces;
 using dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces;
+using dmitry_krasnov_kt_42_23.Interfaces.SpecialitiesInterfaces;
 using dmitry_krasnov_kt_42_23.Interfaces.StudentsInterfaces;
 
 namespace dmitry_krasnov_kt_42_23.ServiceExtensions
@@ -10,6 +11,7 @@ namespace dmitry_krasnov_kt_42_23.ServiceExtensions
         // Регистрация сервисов: связываем интерфейс с его реализацией (Dependency Injection)
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
+            services.AddScoped<ISpecialityService, SpecialityService>();
             services.AddScoped<IGroupService, GroupService>();
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<IDisciplineService, DisciplineService>();

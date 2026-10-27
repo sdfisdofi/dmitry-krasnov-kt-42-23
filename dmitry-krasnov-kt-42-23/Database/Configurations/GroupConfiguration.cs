@@ -32,11 +32,10 @@ namespace dmitry_krasnov_kt_42_23.Database.Configurations
                 .HasColumnType(ColumnType.String).HasMaxLength(100)
                 .HasComment("Название группы");
 
-            builder.Property(p => p.Specialty)
+            builder.Property(p => p.SpecialityId)
                 .IsRequired()
-                .HasColumnName("c_group_specialty")
-                .HasColumnType(ColumnType.String).HasMaxLength(200)
-                .HasComment("Специальность группы");
+                .HasColumnName("f_speciality_id")
+                .HasComment("Идентификатор специальности");
 
             builder.Property(p => p.Year)
                 .IsRequired()
@@ -50,7 +49,21 @@ namespace dmitry_krasnov_kt_42_23.Database.Configurations
                 .HasColumnType(ColumnType.Bool)
                 .HasComment("Признак удаления группы");
 
-            builder.ToTable(TableName);
+            // Связь: у Группы одна Специальность (HasOne), у Специальности много Групп (WithMany)
+            // Удаление у нас мягкое (IsDeleted), поэтому физически удалять специальность с группами БД запрещаем (Restrict)
+            builder.ToTable(TableName)
+                .HasOne(p => p.Speciality)
+                .WithMany()
+                .HasForeignKey(p => p.SpecialityId)
+                .HasConstraintName("fk_f_speciality_id")
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.ToTable(TableName)
+                .HasIndex(p => p.SpecialityId, $"idx_{TableName}_fk_f_speciality_id");
+
+            // Специальность подгружается вместе с группой автоматически
+            builder.Navigation(p => p.Speciality)
+                .AutoInclude();
         }
     }
 }

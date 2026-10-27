@@ -17,50 +17,10 @@ namespace dmitry_krasnov_kt_42_23.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Credit", b =>
-                {
-                    b.Property<int>("CreditId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("credit_id")
-                        .HasComment("Идентификатор записи зачета");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CreditId"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("d_credit_date")
-                        .HasComment("Дата сдачи зачета");
-
-                    b.Property<int>("DisciplineId")
-                        .HasColumnType("int")
-                        .HasColumnName("f_discipline_id")
-                        .HasComment("Идентификатор дисциплины");
-
-                    b.Property<bool>("IsPassed")
-                        .HasColumnType("bit")
-                        .HasColumnName("b_credit_is_passed")
-                        .HasComment("Зачет сдан (true) / не сдан (false)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int")
-                        .HasColumnName("f_student_id")
-                        .HasComment("Идентификатор студента");
-
-                    b.HasKey("CreditId")
-                        .HasName("pk_cd_credit_credit_id");
-
-                    b.HasIndex(new[] { "DisciplineId" }, "idx_cd_credit_fk_f_discipline_id");
-
-                    b.HasIndex(new[] { "StudentId" }, "idx_cd_credit_fk_f_student_id");
-
-                    b.ToTable("cd_credit", (string)null);
-                });
 
             modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Discipline", b =>
                 {
@@ -157,12 +117,10 @@ namespace dmitry_krasnov_kt_42_23.Migrations
                         .HasColumnName("b_is_deleted")
                         .HasComment("Признак удаления группы");
 
-                    b.Property<string>("Specialty")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar")
-                        .HasColumnName("c_group_specialty")
-                        .HasComment("Специальность группы");
+                    b.Property<int>("SpecialityId")
+                        .HasColumnType("int")
+                        .HasColumnName("f_speciality_id")
+                        .HasComment("Идентификатор специальности");
 
                     b.Property<int>("Year")
                         .HasColumnType("int")
@@ -172,7 +130,43 @@ namespace dmitry_krasnov_kt_42_23.Migrations
                     b.HasKey("GroupId")
                         .HasName("pk_cd_group_group_id");
 
+                    b.HasIndex(new[] { "SpecialityId" }, "idx_cd_group_fk_f_speciality_id");
+
                     b.ToTable("cd_group", (string)null);
+                });
+
+            modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Speciality", b =>
+                {
+                    b.Property<int>("SpecialityId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("speciality_id")
+                        .HasComment("Идентификатор записи специальности");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SpecialityId"));
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar")
+                        .HasColumnName("c_speciality_code")
+                        .HasComment("Код специальности");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnName("b_is_deleted")
+                        .HasComment("Признак удаления специальности");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar")
+                        .HasColumnName("c_speciality_title")
+                        .HasComment("Название специальности");
+
+                    b.HasKey("SpecialityId")
+                        .HasName("pk_cd_speciality_speciality_id");
+
+                    b.ToTable("cd_speciality", (string)null);
                 });
 
             modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Student", b =>
@@ -223,27 +217,6 @@ namespace dmitry_krasnov_kt_42_23.Migrations
                     b.ToTable("cd_student", (string)null);
                 });
 
-            modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Credit", b =>
-                {
-                    b.HasOne("dmitry_krasnov_kt_42_23.Models.Discipline", "Discipline")
-                        .WithMany()
-                        .HasForeignKey("DisciplineId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_credit_f_discipline_id");
-
-                    b.HasOne("dmitry_krasnov_kt_42_23.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_credit_f_student_id");
-
-                    b.Navigation("Discipline");
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Grade", b =>
                 {
                     b.HasOne("dmitry_krasnov_kt_42_23.Models.Discipline", "Discipline")
@@ -263,6 +236,18 @@ namespace dmitry_krasnov_kt_42_23.Migrations
                     b.Navigation("Discipline");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Group", b =>
+                {
+                    b.HasOne("dmitry_krasnov_kt_42_23.Models.Speciality", "Speciality")
+                        .WithMany()
+                        .HasForeignKey("SpecialityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_f_speciality_id");
+
+                    b.Navigation("Speciality");
                 });
 
             modelBuilder.Entity("dmitry_krasnov_kt_42_23.Models.Student", b =>

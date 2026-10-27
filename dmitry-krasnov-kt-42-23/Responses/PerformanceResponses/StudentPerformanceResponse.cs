@@ -12,7 +12,6 @@ namespace dmitry_krasnov_kt_42_23.Responses.PerformanceResponses
         public double? AverageGrade { get; set; }
 
         public GradeItem[] Grades { get; set; } = [];
-        public CreditItem[] Credits { get; set; } = [];
     }
 
     // Одна оценка в ответе
@@ -22,16 +21,6 @@ namespace dmitry_krasnov_kt_42_23.Responses.PerformanceResponses
         public int DisciplineId { get; set; }
         public string DisciplineName { get; set; } = string.Empty;
         public int Value { get; set; }
-        public DateTime Date { get; set; }
-    }
-
-    // Один зачет в ответе
-    public class CreditItem
-    {
-        public int CreditId { get; set; }
-        public int DisciplineId { get; set; }
-        public string DisciplineName { get; set; } = string.Empty;
-        public bool IsPassed { get; set; }
         public DateTime Date { get; set; }
     }
 }

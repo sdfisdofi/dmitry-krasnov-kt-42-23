@@ -34,7 +34,12 @@ namespace dmitry_krasnov_kt_42_23.Controllers
         [HttpPost("AddGroup")]
         public async Task<IActionResult> AddGroupAsync(AddGroupRequest request, CancellationToken cancellationToken = default)
         {
-            var group = await _groupService.AddGroupAsync(request, cancellationToken);
+            var (group, error) = await _groupService.AddGroupAsync(request, cancellationToken);
+
+            if (error != null)
+            {
+                return BadRequest(error);
+            }
 
             return Ok(group);
         }
@@ -43,11 +48,11 @@ namespace dmitry_krasnov_kt_42_23.Controllers
         [HttpPut("UpdateGroup")]
         public async Task<IActionResult> UpdateGroupAsync(UpdateGroupRequest request, CancellationToken cancellationToken = default)
         {
-            var group = await _groupService.UpdateGroupAsync(request, cancellationToken);
+            var (group, error) = await _groupService.UpdateGroupAsync(request, cancellationToken);
 
-            if (group == null)
+            if (error != null)
             {
-                return NotFound($"Группа с Id = {request.GroupId} не найдена");
+                return BadRequest(error);
             }
 
             return Ok(group);

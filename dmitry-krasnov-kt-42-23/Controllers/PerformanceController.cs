@@ -20,7 +20,7 @@ namespace dmitry_krasnov_kt_42_23.Controllers
 
         // ===================== Получение успеваемости =====================
 
-        // Оценки и зачеты конкретного студента
+        // Оценки конкретного студента
         [HttpPost("GetStudentPerformance")]
         public async Task<IActionResult> GetStudentPerformanceAsync(StudentPerformanceFilter filter, CancellationToken cancellationToken = default)
         {
@@ -62,7 +62,7 @@ namespace dmitry_krasnov_kt_42_23.Controllers
             return Ok(result);
         }
 
-        // ============ Добавление и изменение оценок и зачетов ============
+        // ================= Добавление и изменение оценок ==================
 
         // Выставление оценки студенту
         [HttpPost("AddGrade")]
@@ -90,34 +90,6 @@ namespace dmitry_krasnov_kt_42_23.Controllers
             }
 
             return Ok(grade);
-        }
-
-        // Выставление зачета студенту
-        [HttpPost("AddCredit")]
-        public async Task<IActionResult> AddCreditAsync(AddCreditRequest request, CancellationToken cancellationToken = default)
-        {
-            var (credit, error) = await _performanceService.AddCreditAsync(request, cancellationToken);
-
-            if (error != null)
-            {
-                return BadRequest(error);
-            }
-
-            return Ok(credit);
-        }
-
-        // Изменение зачета
-        [HttpPut("UpdateCredit")]
-        public async Task<IActionResult> UpdateCreditAsync(UpdateCreditRequest request, CancellationToken cancellationToken = default)
-        {
-            var (credit, error) = await _performanceService.UpdateCreditAsync(request, cancellationToken);
-
-            if (error != null)
-            {
-                return BadRequest(error);
-            }
-
-            return Ok(credit);
         }
     }
 }
