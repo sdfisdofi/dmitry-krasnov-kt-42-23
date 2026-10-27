@@ -4,8 +4,9 @@ namespace dmitry_krasnov_kt_42_23.Filters.GroupFilters
     // Все поля необязательные: если поле не заполнено (null), фильтрация по нему не выполняется
     public class GroupFilter
     {
-        // Специальность (поиск по части названия)
-        public string? Specialty { get; set; }
+        // Фильтр по специальности: можно указать Id специальности или часть ее названия
+        public int? SpecialityId { get; set; }
+        public string? SpecialityTitle { get; set; }
 
         // Год набора группы
         public int? Year { get; set; }

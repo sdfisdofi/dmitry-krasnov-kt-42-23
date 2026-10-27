@@ -19,14 +19,10 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces
 
         public Task<(YearAverageResponse? Result, string? Error)> GetYearAverageAsync(YearAverageFilter filter, CancellationToken cancellationToken);
 
-        // --- Добавление и изменение оценок и зачетов ---
+        // --- Добавление и изменение оценок ---
         public Task<(Grade? Grade, string? Error)> AddGradeAsync(AddGradeRequest request, CancellationToken cancellationToken);
 
         public Task<(Grade? Grade, string? Error)> UpdateGradeAsync(UpdateGradeRequest request, CancellationToken cancellationToken);
-
-        public Task<(Credit? Credit, string? Error)> AddCreditAsync(AddCreditRequest request, CancellationToken cancellationToken);
-
-        public Task<(Credit? Credit, string? Error)> UpdateCreditAsync(UpdateCreditRequest request, CancellationToken cancellationToken);
     }
 
     // Реализация интерфейса: описывает, КАК это делается
@@ -53,14 +49,12 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces
             }
 
             var gradesQuery = _dbContext.Set<Grade>().Where(g => g.StudentId == filter.StudentId);
-            var creditsQuery = _dbContext.Set<Credit>().Where(c => c.StudentId == filter.StudentId);
 
             // Если указана дисциплина - оставляем только ее
             if (filter.DisciplineId.HasValue)
             {
                 var disciplineId = filter.DisciplineId.Value;
                 gradesQuery = gradesQuery.Where(g => g.DisciplineId == disciplineId);
-                creditsQuery = creditsQuery.Where(c => c.DisciplineId == disciplineId);
             }
 
             // Select превращает записи БД в объекты для ответа (это называется проекция).
@@ -77,18 +71,6 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces
                 })
                 .ToArrayAsync(cancellationToken);
 
-            var credits = await creditsQuery
-                .OrderBy(c => c.Date)
-                .Select(c => new CreditItem
-                {
-                    CreditId = c.CreditId,
-                    DisciplineId = c.DisciplineId,
-                    DisciplineName = c.Discipline!.DisciplineName,
-                    IsPassed = c.IsPassed,
-                    Date = c.Date
-                })
-                .ToArrayAsync(cancellationToken);
-
             var result = new StudentPerformanceResponse
             {
                 StudentId = student.StudentId,
@@ -98,8 +80,7 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces
                 AverageGrade = grades.Length > 0
                     ? Math.Round(grades.Average(g => g.Value), 2)
                     : null,
-                Grades = grades,
-                Credits = credits
+                Grades = grades
             };
 
             return (result, null);
@@ -195,7 +176,7 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces
             return (result, null);
         }
 
-        // ============ Добавление и изменение оценок и зачетов ============
+        // ================= Добавление и изменение оценок ==================
 
         public async Task<(Grade? Grade, string? Error)> AddGradeAsync(AddGradeRequest request, CancellationToken cancellationToken = default)
         {
@@ -243,50 +224,6 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.PerformanceInterfaces
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             return (grade, null);
-        }
-
-        public async Task<(Credit? Credit, string? Error)> AddCreditAsync(AddCreditRequest request, CancellationToken cancellationToken = default)
-        {
-            var error = await CheckStudentAndDisciplineAsync(request.StudentId, request.DisciplineId, cancellationToken);
-            if (error != null)
-            {
-                return (null, error);
-            }
-
-            var credit = new Credit
-            {
-                StudentId = request.StudentId,
-                DisciplineId = request.DisciplineId,
-                IsPassed = request.IsPassed,
-                Date = request.Date ?? DateTime.Now
-            };
-
-            await _dbContext.Set<Credit>().AddAsync(credit, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return (credit, null);
-        }
-
-        public async Task<(Credit? Credit, string? Error)> UpdateCreditAsync(UpdateCreditRequest request, CancellationToken cancellationToken = default)
-        {
-            var credit = await _dbContext.Set<Credit>()
-                .FirstOrDefaultAsync(c => c.CreditId == request.CreditId, cancellationToken);
-
-            if (credit == null)
-            {
-                return (null, $"Зачет с Id = {request.CreditId} не найден");
-            }
-
-            credit.IsPassed = request.IsPassed;
-
-            if (request.Date.HasValue)
-            {
-                credit.Date = request.Date.Value;
-            }
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return (credit, null);
         }
 
         // Вспомогательный метод: проверяет, что студент и дисциплина существуют и не удалены.

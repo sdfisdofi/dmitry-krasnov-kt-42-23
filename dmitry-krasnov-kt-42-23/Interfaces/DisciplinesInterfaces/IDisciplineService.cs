@@ -101,7 +101,7 @@ namespace dmitry_krasnov_kt_42_23.Interfaces.DisciplinesInterfaces
                 return false;
             }
 
-            // Мягкое удаление. Оценки и зачеты по дисциплине остаются в БД
+            // Мягкое удаление. Оценки по дисциплине остаются в БД
             discipline.IsDeleted = true;
             await _dbContext.SaveChangesAsync(cancellationToken);
 

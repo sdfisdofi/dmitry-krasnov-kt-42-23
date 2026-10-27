@@ -5,8 +5,9 @@ namespace dmitry_krasnov_kt_42_23.Models
         public int GroupId { get; set; }
         public string GroupName { get; set; } = string.Empty;
 
-        // Специальность (например "Информатика и вычислительная техника")
-        public string Specialty { get; set; } = string.Empty;
+        // Специальность группы (внешний ключ на таблицу специальностей)
+        public int SpecialityId { get; set; }
+        public Speciality? Speciality { get; set; }
 
         // Год набора группы (например 2023)
         public int Year { get; set; }
